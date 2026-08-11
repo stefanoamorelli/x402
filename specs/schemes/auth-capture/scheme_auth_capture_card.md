@@ -19,6 +19,18 @@ Card acceptance builds on top of the existing architecture on `x402`. This propo
 
 We cover the scheme binding, an high-level client and server integration, considerations about the post-settlement lifecycle, and security provisions specific to the card payment rail.
 
+### 1.1 Scope decisions
+
+Card payments involve more steps than the payment exchange, although those processes are not inherently part of the `x402` protocol. `Table 0` collects the decisions we take on what is in the scope of the protocol and what is not. Nevertheless, we provide context and notes on those areas to support integrations.
+
+**Table 0. Scope decisions**
+
+| Topic | Decision | Notes |
+|---|---|---|
+| PCI DSS | PCI DSS compliance is outside the scope of `x402`. Payloads should not carry the PAN, the CVC or track data. | Clause 8.1 covers the high-level implications for PCI DSS, and the considerations for facilitators. |
+| 3DS | Challenge orchestration is the responsibility of the PSP and the issuer. `x402` defines how a challenge can interrupt the 402 loop, and how the retry resumes the same payment instead of initiating a new one. | The `threeds-challenge` extension, Clauses 4.4 and 7.2. |
+| Post-settlement lifecycle | Clearing, payouts and disputes are within the scope of the card networks and the PSP. | The proposed `payment-events` channel carries their outcomes as events, Clause 3. |
+
 ## 2 Glossary
 
 **PSP** payment service provider. The entity that tokenizes card data and executes authorizations, captures and refunds against the card networks (e.g. Stripe, Adyen)
