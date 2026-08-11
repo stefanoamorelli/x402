@@ -13,7 +13,7 @@
 
 ## Summary
 
-Card acceptance builds on top of the existing architecture on `x402`. This proposal defines a card network binding for the `auth-capture` scheme under `card:<psp>` ids, a potential credit-backed `batch-settlement` binding for card micropayments, two extensions (`threeds-challenge` and `payment-events`), and the main SDK changes they need.
+Card acceptance builds on top of the existing architecture on `x402`. This proposal defines a card network binding for the `auth-capture` scheme under `card:<card-network>:<psp>` ids, a potential credit-backed `batch-settlement` binding for card micropayments, two extensions (`threeds-challenge` and `payment-events`), and the main SDK changes they need.
 
 ## 1 Scope
 
@@ -98,7 +98,7 @@ The card lifecycle (authorize, then capture or void, then refund) is the lifecyc
 
 ### 4.2 Network identifiers
 
-Network identifiers take the form `card:<psp>`, for example `card:stripe` and `card:adyen`. The identifier names the PSP rather than the card brand, because a tokenized payload is only redeemable at the PSP that minted the token. The brand could be credential metadata eventually carried in `extra.cardNetworks`.
+Network identifiers take the form `card:<card-network>:<psp>`, for example `card:visa:stripe` and `card:mastercard:adyen`. The last segment names the PSP because a tokenized payload is only redeemable at the PSP that minted the token. The middle segment names the card network. Interchange, surcharge rules and acceptance differ across networks. Declaring the network in the identifier lets a server offer, price and route each brand independently. A server that accepts several brands through one PSP lists one entry per brand. Wildcards compose per segment, so a client can register `card:*` for any card payment or `card:visa:*` for one brand across PSPs.
 
 ### 4.3 Payment flow and settlement
 
@@ -197,7 +197,7 @@ sequenceDiagram
     participant RS as Resource server
     participant F as Facilitator (PSP adapter)
     C->>RS: GET /resource
-    RS-->>C: 402, accepts includes auth-capture on card:stripe, paymentFlow escrow
+    RS-->>C: 402, accepts includes auth-capture on card:visa:stripe, paymentFlow escrow
     C->>U: mount PSP hosted fields, tokenize
     C->>RS: retry with PAYMENT-SIGNATURE (token, payment id)
     RS->>F: POST /settle, step authorize
@@ -228,7 +228,7 @@ EXAMPLE Mixed route configuration:
 ```ts
 accepts: [
   { scheme: "exact", network: "eip155:8453", payTo: PAY_TO_EVM, price: "$0.97", maxTimeoutSeconds: 60 },
-  { scheme: "auth-capture", network: "card:stripe", payTo: "acct_1Nxyz",
+  { scheme: "auth-capture", network: "card:visa:stripe", payTo: "acct_1Nxyz",
     price: "$1.00", maxTimeoutSeconds: 900,
     extra: { paymentFlow: "escrow", autoCapture: false } },
 ]
