@@ -31,10 +31,6 @@ We cover the scheme binding, an high-level client and server integration, consid
 
 **3DS** EMV 3-D Secure; the card networks' cardholder authentication protocol, used to satisfy SCA (strong customer authentication) under PSD2
 
-**MIT** merchant-initiated transaction; a payment executed against a stored mandate without the cardholder present
-
-**network token** card-network-issued replacement for the PAN, scoped to one merchant or PSP and refreshed across card reissue
-
 ## 3 Payment lifecycle comparison between on-chain and card payments
 
 At payment time the two rails run the same steps. The buyer produces a payment instrument (a signed transfer on-chain and a card token on cards), the facilitator checks it, the money moves, and the resource is delivered. `Figure 1` traces the exchange both rails share, and then the tail that only cards have, the main difference comes after delivery. An on-chain payment is final a few dozen seconds after settlement the funds cannot come back. A card payment, on the other hand, is still in flight when the HTTP exchange completes. The funds reach the merchant days later and the cardholder can dispute the charge for several months.
