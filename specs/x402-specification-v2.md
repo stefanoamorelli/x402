@@ -122,7 +122,7 @@ Each `PaymentRequirements` object in the `accepts` array contains:
 | Field Name          | Type     | Required | Description                                                                                                               |
 | ------------------- | -------- | -------- |---------------------------------------------------------------------------------------------------------------------------|
 | `scheme`            | `string` | Required | Payment scheme identifier (e.g., "exact")                                                                                 |
-| `network`           | `string` | Required | Blockchain network identifier in CAIP-2 format (e.g., "eip155:84532")                                                     |
+| `network`           | `string` | Required | Ledger network identifier, compatible with CAIP-2 format (e.g., "{namespace}:{reference}"), which additionally permits a sub-reference (e.g., "{namespace}:{reference}:{sub-reference}")                                                     |
 | `amount`            | `string` | Required | Required payment amount in atomic token units                                                                             |
 | `asset`             | `string` | Required | Token contract address or ISO 4217 currency code for fiat     |
 | `payTo`             | `string` | Required | Recipient wallet address or role constant (e.g., "merchant")                                                              |
@@ -247,7 +247,7 @@ The `SettleResponse` schema contains the following fields:
 | `errorReason` | `string`  | Optional | Error reason if settlement failed (omitted if successful)             |
 | `payer`       | `string`  | Optional | Address of the payer's wallet                                         |
 | `transaction` | `string`  | Required | Blockchain transaction hash (empty string if settlement failed)       |
-| `network`     | `string`  | Required | Blockchain network identifier in CAIP-2 format                        |
+| `network`     | `string`  | Required | Ledger network identifier, compatible with CAIP-2 format (e.g., "{namespace}:{reference}"), which additionally permits a sub-reference (e.g., "{namespace}:{reference}:{sub-reference}")                        |
 | `amount`      | `string`  | Optional | The actual amount settled in atomic units (omitted if not applicable) |
 | `extensions`  | `object`  | Optional | Protocol extensions data                                              |
 
@@ -472,7 +472,7 @@ Each `SupportedKind` object in the `kinds` array contains:
 | ------------- | -------- | -------- | ---------------------------------------------------------- |
 | `x402Version` | `number` | Required | Protocol version supported (2 for v2)                      |
 | `scheme`      | `string` | Required | Payment scheme identifier (e.g., "exact")                  |
-| `network`     | `string` | Required | Blockchain network identifier in CAIP-2 format             |
+| `network`     | `string` | Required | Ledger network identifier, compatible with CAIP-2 format (e.g., "{namespace}:{reference}"), which additionally permits a sub-reference (e.g., "{namespace}:{reference}:{sub-reference}")             |
 | `extra`       | `object` | Optional | Additional scheme-specific configuration                   |
 
 **8. Discovery API**
@@ -613,9 +613,11 @@ The protocol supports integration with authentication systems (e.g., Sign-In wit
 
 **11.1 Network Identifiers**
 
-Networks in x402 v2 use CAIP-2 (Chain Agnostic Improvement Proposal) format: `namespace:reference`.
+Networks in x402 v2 are compatible with CAIP-2 (Chain Agnostic Improvement Proposal) format: `namespace:reference`.
 
 **Format:** `{namespace}:{reference}` (e.g., `eip155:8453` for Base mainnet)
+
+An identifier MAY additionally carry a sub-reference: `{namespace}:{reference}:{sub-reference}`. A sub-reference names the party at which the payload is redeemable when the reference alone does not identify it (e.g., `card:visa:stripe`, where the payload is a token minted by, and redeemable only at, one PSP). Identifiers without a sub-reference remain valid CAIP-2.
 
 Non-blockchain networks are encouraged to follow the CAIP-2 format (e.g., `ach:us`, `sepa:eu`).
 
