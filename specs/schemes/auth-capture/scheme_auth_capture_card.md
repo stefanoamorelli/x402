@@ -102,7 +102,7 @@ The internals of how clearing, payouts and disputes are actually resolved stay w
 
 ### 4.1 General
 
-The card lifecycle (authorize, then capture or void, then refund) is the lifecycle the `auth-capture` scheme (TBD). Cards are therefore defined as a network binding for that scheme, in the same way `exact` has EVM bindings. By using the existing abstraction allows the selection, hooks and receipts continue to work as they do for the crypto schemes, and lets the application code stay unaware of which method paid.
+The card lifecycle (authorize, then capture or void, then refund) is the lifecycle of the [`auth-capture`](./scheme_auth_capture.md) scheme. Cards are therefore defined as a network binding for that scheme, in the same way `exact` has EVM bindings. By using the existing abstraction allows the selection, hooks and receipts continue to work as they do for the crypto schemes, and lets the application code stay unaware of which method paid.
 
 ### 4.2 Network identifiers
 
@@ -248,8 +248,6 @@ Configuration order is preserved into `accepts[]`, and the default client select
 
 The complexity of cards accpetance is mostly on the facilitator (by design). The client learns to tokenize, and the resource server is unchanged. The PSP integration (3DS orchestration, idempotency, webhook ingestion, dispute handling, payout reconciliation) is concentrated in the facilitator, which is where `x402` already places trust.
 
-TBD
-
 ## 7 Card-specific considerations
 
 ### 7.1 Wallets
@@ -263,8 +261,6 @@ An issuer in the EU can refuse an otherwise valid authorization and demand authe
 ### 7.3 Decline handling and retry limits
 
 Card errors divide into soft declines (retriable with backoff), hard declines (not retriable) and step-up. Retry limits are card-network rules with fines attached, hence retry classes should belong in the binding specification rather than in application code.
-
-TBD
 
 ## 8 Security considerations
 
