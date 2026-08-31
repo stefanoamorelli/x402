@@ -4,6 +4,8 @@ export type { ProtocolFamily } from './networks/networks';
 export type Transport = 'http' | 'mcp';
 export type PaymentScheme = 'exact' | 'upto' | 'batch-settlement';
 export type AssetTransferMethod = 'eip3009' | 'permit2' | 'sequence' | 'ticketSequence';
+/** Payment ordering on the accept. Omitted on an endpoint means `authorization`. */
+export type PaymentFlow = 'authorization' | 'upfront' | 'escrow';
 
 /**
  * Resolved asset transfer method for an endpoint.
@@ -24,15 +26,19 @@ export function endpointAssetTransferMethod(endpoint: TestEndpoint): AssetTransf
 }
 
 /**
- * Resolved payment scheme for an EVM endpoint.
- * Defaults to `exact` when omitted (non-batch endpoints).
+ * Resolved payment scheme for an endpoint.
+ * Defaults to `exact` when omitted.
  */
-export function endpointPaymentScheme(endpoint: TestEndpoint): PaymentScheme | undefined {
-  const family = endpoint.protocolFamily ?? 'evm';
-  if (family !== 'evm') {
-    return undefined;
-  }
+export function endpointPaymentScheme(endpoint: TestEndpoint): PaymentScheme {
   return endpoint.scheme ?? 'exact';
+}
+
+/**
+ * Resolved payment flow for an endpoint.
+ * Defaults to `authorization` when omitted.
+ */
+export function endpointPaymentFlow(endpoint: TestEndpoint): PaymentFlow {
+  return endpoint.paymentFlow ?? 'authorization';
 }
 
 /** Harness knobs for exact / upto endpoints (Permit2 settle paths). */
@@ -103,6 +109,8 @@ export interface TestEndpoint {
   protocolFamily?: ProtocolFamily;
   scheme?: PaymentScheme;
   assetTransferMethod?: AssetTransferMethod;
+  /** Omitted or `authorization` is the default (verify → resource → settle). */
+  paymentFlow?: PaymentFlow;
   schemeOptions?: SchemeOptions;
   extensions?: string[];
   /** For MCP tools: the tool name used in tools/call. Defaults to path if not specified. */
@@ -132,6 +140,7 @@ export interface TestConfig {
   evm?: {
     assetTransferMethods?: AssetTransferMethod[];
   };
+  facilitators?: string[];
   endpoints?: TestEndpoint[];
   supportedMethods?: string[];
   capabilities?: {
