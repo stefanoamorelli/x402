@@ -7,6 +7,16 @@
 - **Contributor(s)**: Erik Reppel ([@erikreppel](https://github.com/erikreppel)), Steve Kaliski (Stripe, [@sjkaliski](https://github.com/sjkaliski)), Carson Roscoe (Coinbase, [@CarsonRoscoe](https://github.com/CarsonRoscoe)), Adam Krochak (American Express)
 - **Discussion**: `#wg-card-acceptance`
 
+## Open items
+
+| # | Open item | What it is about | Owner | Possible options |
+|---|---|---|---|---|
+| 1 | What goes in v1 | Whether v1 is only for agents paying for requests, with card checkout for a person in a browser, agent spending permissions, bundled micropayments, bank verification (3DS), post-payment updates, statement text and refunds handled later as separate proposals (§9). | TBD | (a) agents only, extras later; (b) also support a person paying in a browser; (c) bring one of the other extras back into v1 |
+| 2 | What card token does an agent pay with? | A token usually works only with the PSP account that created it, and an agent pays many merchants it has never used before, so it needs a token each merchant's PSP account can charge (§4.2 and §4.4). | TBD | (a) network agent tokens; (b) a token the PSP shares with the merchant; (c) leave it out of the spec |
+| 3 | How do card networks recognise an agent's x402 payment? | An agent payment fits neither card-network category, cardholder-initiated (CIT) or merchant-initiated (MIT), so the spec has to say what the authorization carries for the network to handle it correctly (§4.4 and §4.7). | TBD | (a) the network agent token carries it; (b) submit it as a payment without the cardholder present (e.g. Stripe `off_session`) and let the PSP set the rest; (c) a dedicated `x402` or agent marker, once a network defines one |
+| 4 | Which ID ties the hold and the charge together? | The `payment-identifier` extension rejects a second message with the same ID and different contents, which is exactly what the charge after a hold is, so the draft uses its own `paymentId` (§4.4). | TBD | (a) `paymentId` on every message; (b) reuse `payment-identifier` with a rule that allows the charge message |
+| 5 | How do we pay for requests that cost less than the card fee? | A card payment carries a fee that can be bigger than the price of a cheap `x402` request (§4.5). | TBD | (a) one card payment per request, and merchants offer cards only above a price they choose; (b) one hold covers several requests and the total is charged once; (c) cheap requests use other payment methods until the bundling proposal is ready |
+
 ## Motivation
 
 `x402` found its popularity through micro, on-chain transactions, although its potential is much bigger than that. The protocol is payment-method agnostic by construction, and this document proposes cards as its first non-crypto binding.
@@ -165,6 +175,8 @@ The PSP is named in `extra.psp` (§4.3), not in the identifier. A token is redee
 | `paymentId` | Yes | Client-generated identity of the payment, 16 to 128 characters, alphanumeric, hyphens and underscores. Reused unchanged on every retry of the same payment |
 
 The token is the whole client authorization. The binding does not say how the client obtained it (hosted fields, a card on file, a wallet, a network or agentic token), nor whether an agent may use it. The PSP and the issuer decide that when they receive the authorization.
+
+NOTE: Whether the payload carries more than the token depends on open items 2 and 3. A field is added once a party that consumes it is identified.
 
 `paymentId` identifies the payment through its whole lifecycle, on the client payload and on every lifecycle payload (§4.6). It serves the same idempotency purpose as the `payment-identifier` extension, but is part of the payload so that the binding does not depend on an optional extension.
 
